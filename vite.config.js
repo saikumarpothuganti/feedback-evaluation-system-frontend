@@ -3,8 +3,12 @@ import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => {
-  // Use root base in dev; use repo subpath only for production builds (e.g. GitHub Pages)
-  const base = command === 'build' ? '/feedback-evaluation-system/' : '/';
+  // Default to root path for live server deployments.
+  // Override with VITE_BASE_PATH (example: /feedback-evaluation-system/ for GitHub Pages).
+  const envBasePath = process.env.VITE_BASE_PATH;
+  const base = command === 'build'
+    ? (envBasePath || '/')
+    : '/';
 
   return {
     plugins: [react()],
