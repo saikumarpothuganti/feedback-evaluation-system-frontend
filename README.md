@@ -40,6 +40,33 @@ npm run dev:all
 # Or separately:
 npm run server  # AI proxy on port 8787
 npm run dev     # React app on port 5173
+
+# Spring Boot backend
+npm run spring:dev   # Spring Boot API on port 8080
+npm run dev:spring   # Spring Boot + React together
+```
+
+## Backend Services (Spring Boot + MySQL)
+
+This project includes a Spring Boot backend in backend/ for Java-based API services.
+
+### Endpoints
+- GET /api/health
+- POST /api/feedback
+
+### Java Requirements
+- Java 21
+- Maven 3.9+
+
+### MySQL Requirements
+- MySQL 8+
+- Default local database: feedback_db on port 3306
+
+### Run Backend Directly
+
+```bash
+cd backend
+mvn spring-boot:run
 ```
 
 ## 🎓 Academic Rubric: 90/90 Points

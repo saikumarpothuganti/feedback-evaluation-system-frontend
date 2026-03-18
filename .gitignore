@@ -8,6 +8,8 @@ pnpm-debug.log*
 # Build output
 dist/
 build/
+target/
+backend/target/
 
 # Environment variables
 .env
