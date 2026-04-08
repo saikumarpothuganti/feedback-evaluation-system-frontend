@@ -1,10 +1,10 @@
 // filepath: d:\\Frontend Development and Frameworks\\Project Files\\src\\components\\Register.jsx
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
-const USERS_KEY = 'registeredUsers';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -33,22 +33,12 @@ const Register = () => {
   };
   React.useEffect(() => { generateCaptcha(); }, []);
 
-  const users = useMemo(() => {
-    try {
-      const raw = localStorage.getItem(USERS_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
-  }, []);
-
   const validate = () => {
     const e = {};
     if (!form.fullName.trim()) e.fullName = 'Full name is required';
     if (!form.email.trim()) e.email = 'Email is required';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Enter a valid email';
     if (!form.username.trim()) e.username = 'Username is required';
-    else if (users.some(u => u.username.toLowerCase() === form.username.toLowerCase())) e.username = 'Username already exists';
     if (!form.password) e.password = 'Password is required';
     else if (form.password.length < 6) e.password = 'Use at least 6 characters';
     if (form.password !== form.confirmPassword) e.confirmPassword = 'Passwords do not match';
@@ -80,32 +70,34 @@ const Register = () => {
     setSubmitting(true);
 
     try {
-      const nextUsers = [...users, {
-        id: Date.now(),
-        fullName: form.fullName.trim(),
-        email: form.email.trim().toLowerCase(),
-        username: form.username.trim(),
-        password: form.password, // Demo only; do NOT store plain text in real apps
-        role: form.role,
-        createdAt: new Date().toISOString(),
-      }];
-      localStorage.setItem(USERS_KEY, JSON.stringify(nextUsers));
+      const response = await fetch(`${API_BASE_URL}/api/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fullName: form.fullName.trim(),
+          email: form.email.trim().toLowerCase(),
+          username: form.username.trim(),
+          password: form.password,
+          role: form.role,
+        }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload?.message || 'Unable to register user');
+      }
 
       // Auto-login and go to role page
       login(form.username.trim(), form.role);
-      switch (form.role) {
-        case 'student':
-          navigate('/student');
-          break;
-        case 'faculty':
-          navigate('/faculty');
-          break;
-        case 'admin':
-          navigate('/admin');
-          break;
-        default:
-          navigate('/dashboard');
-      }
+      navigate('/portal');
+    } catch (error) {
+      setErrors((prev) => ({
+        ...prev,
+        submit: error.message || 'Registration failed',
+      }));
     } finally {
       setSubmitting(false);
     }
@@ -118,6 +110,7 @@ const Register = () => {
         <h2>Create Account</h2>
 
         <form onSubmit={handleSubmit}>
+          {errors.submit && <p style={{ color: '#ffd700', marginBottom: 12 }}>{errors.submit}</p>}
           <div className="form-group">
             <input
               type="text"
@@ -220,7 +213,7 @@ const Register = () => {
 
         <div className="info-text" style={{ marginTop: 16 }}>
           <p>Already have an account? <Link to="/login" style={{ color: '#ffd700' }}>Login</Link></p>
-          <p style={{ opacity: 0.8 }}>Note: This is a demo. Accounts are stored in your browser (localStorage).</p>
+          <p style={{ opacity: 0.8 }}>Note: Accounts are stored in the backend database now.</p>
         </div>
       </div>
     </div>

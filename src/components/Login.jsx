@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 const Login = () => {
   const [selectedRole, setSelectedRole] = useState('');
@@ -22,15 +24,6 @@ const Login = () => {
     setCaptchaError('');
   };
   React.useEffect(() => { generateCaptcha(); }, []);
-    const users = useMemo(() => {
-      try {
-        const raw = localStorage.getItem('registeredUsers');
-        return raw ? JSON.parse(raw) : [];
-      } catch {
-        return [];
-      }
-    }, []);
-  
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -53,7 +46,7 @@ const Login = () => {
     setCaptchaError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Captcha validation
     if (parseInt(captcha.answer) !== captcha.a + captcha.b) {
@@ -70,7 +63,15 @@ const Login = () => {
       return;
     }
 
-    // Find user in localStorage (front-end demo authentication)
+    const response = await fetch(`${API_BASE_URL}/api/users`);
+    if (!response.ok) {
+      setError('Unable to reach backend user list.');
+      return;
+    }
+
+    const users = await response.json();
+
+    // Find user in backend storage
     const found = users.find(u => u.username.toLowerCase() === uname.toLowerCase());
     if (!found) {
       setError('Account not found. Please register first.');
@@ -194,10 +195,10 @@ const Login = () => {
             </form>
             <div className="info-text">
               <p>For demo purposes:</p>
-              <p>- Click Faculty and login for Faculty access</p>
-              <p>- Click Admin or use a username containing "admin" for Admin access</p>
-              <p>- Click Student or use any other username for Student access</p>
+              <p>- Login now checks the backend database</p>
+              <p>- Register first, then use those credentials here</p>
               <p>New user? <Link to="/register" style={{ color: '#ffd700' }}>Register</Link></p>
+              <p>Need to view registered details? <Link to="/portal" style={{ color: '#ffd700' }}>Open Portal</Link></p>
             </div>
             <button 
               type="button" 

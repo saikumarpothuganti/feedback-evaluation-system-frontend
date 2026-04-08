@@ -16,6 +16,7 @@ import Help from './components/Help.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import Chatbot from './components/Chatbot.jsx';
 import Register from './components/Register.jsx';
+import Portal from './components/Portal.jsx';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
               <Route path="/" element={<Login />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/portal" element={<Portal />} />
               <Route 
                 path="/dashboard" 
                 element={
