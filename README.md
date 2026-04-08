@@ -11,14 +11,8 @@ React + Vite frontend for Student Feedback Management System.
 3. Build for production:
    npm run build
 
-## Docker
+## npm scripts
 
-Build and run frontend container from this folder:
-
-```
-docker build -f Dockerfile.frontend -t feedback-frontend .
-docker run -p 80:80 feedback-frontend
-```
-
-The Nginx config proxies /api calls to http://host.docker.internal:8080.
-Update nginx/default.conf if your backend URL is different.
+- `npm run dev` starts the Vite dev server.
+- `npm run build` creates a production build.
+- `npm run preview` serves the production build locally.
